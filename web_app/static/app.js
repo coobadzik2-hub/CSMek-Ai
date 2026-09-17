@@ -47,6 +47,8 @@ const answerHistory = JSON.parse(localStorage.getItem('csmek-answer-history') ||
 const favoriteAnswers = JSON.parse(localStorage.getItem('csmek-favorite-answers') || '[]');
 const copyAnswerBtn = document.getElementById('copyAnswerBtn');
 const favoriteAnswerBtn = document.getElementById('favoriteAnswerBtn');
+const personalLibraryList = document.getElementById('personalLibraryList');
+const personalTabs = document.querySelectorAll('.personal-tab');
 
 const carState = {
   running: false,
@@ -1188,6 +1190,7 @@ async function loadLibrary() {
       btn.type = 'button';
       btn.className = 'library-item' + (index === 0 ? ' active' : '');
       btn.setAttribute('aria-pressed', index === 0 ? 'true' : 'false');
+      btn.dataset.search = `${item.summary || ''} ${(item.sections || []).map((section) => `${section.title} ${(section.text || []).join(' ')} ${(section.points || []).join(' ')}`).join(' ')}`;
       const visual = categoryVisual(item.title);
       btn.innerHTML = `<span class="category-visual ${visual.className}" aria-hidden="true"><span>${visual.symbol}</span></span><span class="category-item-copy"><strong>${escapeHtml(item.title)}</strong><small>Dokument źródłowy</small></span><span class="category-item-arrow">→</span>`;
       btn.addEventListener('click', () => {
@@ -1209,7 +1212,7 @@ async function loadLibrary() {
 librarySearch?.addEventListener('input', () => {
   const query = librarySearch.value.trim().toLocaleLowerCase('pl-PL');
   libraryList?.querySelectorAll('.library-item').forEach((item) => {
-    item.hidden = query && !item.textContent.toLocaleLowerCase('pl-PL').includes(query);
+    item.hidden = query && !(item.textContent + (item.dataset.search || '')).toLocaleLowerCase('pl-PL').includes(query);
   });
 });
 
@@ -1419,6 +1422,23 @@ favoriteAnswerBtn?.addEventListener('click', () => {
   localStorage.setItem('csmek-favorite-answers', JSON.stringify(favoriteAnswers.slice(0, 30)));
   showAnswerInQuestionPanel(latestAnswer);
 });
+
+function renderPersonalLibrary(mode = 'history') {
+  if (!personalLibraryList) return;
+  const entries = mode === 'favorites' ? favoriteAnswers : answerHistory;
+  personalLibraryList.innerHTML = entries.length ? entries.slice(0, 6).map((entry, index) => `<button class="personal-entry" data-personal-index="${index}" type="button"><strong>${escapeHtml(entry.question || 'Zapisana odpowiedź')}</strong><small>${escapeHtml((entry.answer || '').slice(0, 140))}</small></button>`).join('') : '<p class="personal-empty">Brak zapisanych materiałów.</p>';
+  personalLibraryList.querySelectorAll('.personal-entry').forEach((button) => button.addEventListener('click', () => {
+    const entry = entries[Number(button.dataset.personalIndex)];
+    if (entry?.question) input.value = entry.question;
+    if (entry?.answer) { latestAnswer = entry.answer; showAnswerInQuestionPanel(entry.answer); }
+  }));
+}
+
+personalTabs.forEach((tab) => tab.addEventListener('click', () => {
+  personalTabs.forEach((item) => item.classList.toggle('is-active', item === tab));
+  renderPersonalLibrary(tab.dataset.personalTab);
+}));
+renderPersonalLibrary();
 
 function showQuestionInput() {
   if (!questionAnswerSwap) return;
