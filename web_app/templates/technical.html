@@ -48,7 +48,11 @@
             <input type="hidden" name="category" value="Uwagi dotyczące Centrum Symulacji" />
             <div class="field-row"><label>Imię i nazwisko<input name="reporter" required placeholder="Jak możemy się z Tobą skontaktować?" /></label><label>E-mail lub telefon<input name="contact" required placeholder="Dane kontaktowe" /></label></div>
             <div class="field-row"><label>Priorytet<select name="priority"><option>Standardowy</option><option>Ważna uwaga</option><option>Pilne przed zajęciami</option></select></label><label>Temat uwagi<input name="location" required placeholder="Np. organizacja zajęć, wyposażenie, komfort pracy" /></label></div>
+            <div class="field-row"><label>Termin zajęć<input name="event_time" type="datetime-local" /></label><label>Wpływ problemu<select name="impact"><option>Brak wpływu na zajęcia</option><option>Utrudnia zajęcia</option><option>Blokuje zajęcia</option></select></label></div>
+            <div class="field-row"><label>Liczba osób dotkniętych problemem<input name="affected_people" type="number" min="0" placeholder="Np. 12" /></label><label>Komunikat błędu<input name="error_message" placeholder="Jeśli pojawił się komunikat" /></label></div>
             <label>Treść uwagi<textarea name="description" rows="6" required placeholder="Opisz swoją uwagę, pomysł albo sugestię dotyczącą Centrum Symulacji."></textarea></label>
+            <label>Co już zostało sprawdzone?<textarea name="steps_taken" rows="3" placeholder="Np. sprawdzono zasilanie, przewód i ponowne uruchomienie"></textarea></label>
+            <label>Zdjęcie lub zrzut ekranu<input name="attachment" type="file" accept="image/jpeg,image/png,image/webp,.pdf" /></label>
             <div class="form-footer"><span><i class="required-dot">*</i> Pola wymagane</span><button class="submit-button" type="submit">Wyślij zgłoszenie <span>→</span></button></div>
           </form>
           <div id="reportResult" class="report-result" role="status" aria-live="polite" hidden></div>
