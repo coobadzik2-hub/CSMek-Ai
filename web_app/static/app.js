@@ -18,6 +18,7 @@ const libraryModal = document.getElementById('libraryModal');
 const closeLibraryBtn = document.getElementById('closeLibrary');
 const libraryList = document.getElementById('libraryList');
 const libraryDetail = document.getElementById('libraryDetail');
+const librarySearch = document.getElementById('librarySearch');
 const categoryInfoModal = document.getElementById('categoryInfoModal');
 const categoryInfoDetail = document.getElementById('categoryInfoDetail');
 const categoryInfoTitle = document.getElementById('categoryInfoTitle');
@@ -42,6 +43,10 @@ const carLap = document.getElementById('carLap');
 const carTime = document.getElementById('carTime');
 const carContext = carGameCanvas?.getContext('2d');
 let knowledgeItems = [];
+const answerHistory = JSON.parse(localStorage.getItem('csmek-answer-history') || '[]');
+const favoriteAnswers = JSON.parse(localStorage.getItem('csmek-favorite-answers') || '[]');
+const copyAnswerBtn = document.getElementById('copyAnswerBtn');
+const favoriteAnswerBtn = document.getElementById('favoriteAnswerBtn');
 
 const carState = {
   running: false,
@@ -1169,6 +1174,7 @@ async function loadLibrary() {
 
     const data = await response.json();
     const items = data.items || [];
+    knowledgeItems = items;
 
     if (!items.length) {
       libraryList.innerHTML = '<p class="library-status">Brak kategorii do wyświetlenia.</p>';
@@ -1199,6 +1205,13 @@ async function loadLibrary() {
     libraryDetail.innerHTML = '<p class="library-status">Sprawdź połączenie z serwerem i spróbuj ponownie.</p>';
   }
 }
+
+librarySearch?.addEventListener('input', () => {
+  const query = librarySearch.value.trim().toLocaleLowerCase('pl-PL');
+  libraryList?.querySelectorAll('.library-item').forEach((item) => {
+    item.hidden = query && !item.textContent.toLocaleLowerCase('pl-PL').includes(query);
+  });
+});
 
 function showLibraryDetail(item) {
   if (!categoryInfoDetail || !categoryInfoModal) return;
@@ -1385,10 +1398,27 @@ function speakAnswer(answer) {
 function showAnswerInQuestionPanel(answer) {
   if (!questionAnswerSwap || !questionAnswerText) return;
   questionAnswerText.innerHTML = formatAnswer(answer);
+  if (favoriteAnswerBtn) favoriteAnswerBtn.textContent = favoriteAnswers.some((item) => item.answer === answer) ? '★ Ulubione' : '☆ Ulubione';
   document.querySelector('.panel-main .actions')?.classList.add('is-hidden');
   questionAnswerSwap.hidden = false;
   requestAnimationFrame(() => questionAnswerSwap.classList.add('is-visible'));
 }
+
+copyAnswerBtn?.addEventListener('click', async () => {
+  if (!latestAnswer) return;
+  await navigator.clipboard.writeText(latestAnswer);
+  copyAnswerBtn.textContent = 'Skopiowano';
+  window.setTimeout(() => { copyAnswerBtn.textContent = 'Kopiuj'; }, 1400);
+});
+
+favoriteAnswerBtn?.addEventListener('click', () => {
+  if (!latestAnswer) return;
+  const index = favoriteAnswers.findIndex((item) => item.answer === latestAnswer);
+  if (index >= 0) favoriteAnswers.splice(index, 1);
+  else favoriteAnswers.unshift({ answer: latestAnswer, savedAt: new Date().toISOString() });
+  localStorage.setItem('csmek-favorite-answers', JSON.stringify(favoriteAnswers.slice(0, 30)));
+  showAnswerInQuestionPanel(latestAnswer);
+});
 
 function showQuestionInput() {
   if (!questionAnswerSwap) return;
@@ -1541,6 +1571,8 @@ async function askAssistant(text) {
     const data = await response.json();
     const answer = typeof data.answer === 'string' && data.answer.trim() ? data.answer : 'Agent nie zwrócił treści odpowiedzi.';
     latestAnswer = answer;
+    answerHistory.unshift({ question: value, answer, savedAt: new Date().toISOString() });
+    localStorage.setItem('csmek-answer-history', JSON.stringify(answerHistory.slice(0, 30)));
     conversationHistory.push({ role: 'user', content: value }, { role: 'assistant', content: answer });
     if (conversationHistory.length > 8) conversationHistory.splice(0, conversationHistory.length - 8);
     if (responseText) responseText.innerHTML = formatAnswer(answer);
