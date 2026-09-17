@@ -56,6 +56,8 @@ const equipmentDetailsLabel = document.getElementById('equipmentDetailsLabel');
 let activeServiceKey = 'simulators';
 const reportForm = document.getElementById('reportForm');
 const reportResult = document.getElementById('reportResult');
+const trackingForm = document.getElementById('trackingForm');
+const trackingResult = document.getElementById('trackingResult');
 const checks = [...document.querySelectorAll('.check-item input')];
 const readinessBadge = document.getElementById('readinessBadge');
 const readinessCount = document.getElementById('readinessCount');
@@ -509,7 +511,7 @@ reportForm?.addEventListener('submit', async (event) => {
     const data = await response.json();
     if (!response.ok) throw new Error(data.detail || 'Nie udało się zapisać zgłoszenia.');
     if (attachment instanceof File && attachment.size) { const upload = new FormData(); upload.append('attachment', attachment); await fetch(`/api/technical-reports/${encodeURIComponent(data.report_id)}/attachment`, { method: 'POST', body: upload }); }
-    reportResult.innerHTML = `<strong>Zgłoszenie ${data.report_id} zostało zapisane.</strong> Zespół techniczny otrzymał opis problemu. Zachowaj ten numer do kontaktu.`;
+    reportResult.innerHTML = `<strong>Zgłoszenie ${data.report_id} zostało zapisane.</strong> Zespół techniczny otrzymał opis problemu. Zachowaj ten numer do śledzenia statusu.`;
     reportResult.hidden = false;
     reportForm.reset();
   } catch (error) {
@@ -518,5 +520,20 @@ reportForm?.addEventListener('submit', async (event) => {
   } finally {
     submitButton.disabled = false;
     submitButton.innerHTML = 'Wyślij zgłoszenie <span>→</span>';
+  }
+});
+
+trackingForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const reportId = document.getElementById('trackingId').value.trim();
+  trackingResult.hidden = false;
+  trackingResult.textContent = 'Sprawdzam status...';
+  try {
+    const response = await fetch(`/api/technical-reports/${encodeURIComponent(reportId)}`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail || 'Nie znaleziono zgłoszenia.');
+    trackingResult.innerHTML = `<strong>${escapeHtml(data.report_id)}</strong><span>Status: ${escapeHtml(data.status)}</span><span>Priorytet: ${escapeHtml(data.priority)}</span><span>Przypisane: ${escapeHtml(data.assigned_to)}</span>`;
+  } catch (error) {
+    trackingResult.textContent = error.message;
   }
 });
