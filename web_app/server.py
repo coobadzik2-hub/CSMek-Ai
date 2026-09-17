@@ -61,6 +61,12 @@ class TechnicalReport(BaseModel):
     priority: str
     location: str
     description: str
+    event_time: str = ""
+    impact: str = ""
+    affected_people: int | None = None
+    error_message: str = ""
+    steps_taken: str = ""
+    attachment_url: str = ""
 
 
 class TechnicalReportStatusUpdate(BaseModel):
@@ -102,7 +108,9 @@ INBOX_PASSWORD = os.getenv("CSMEK_ADMIN_PASSWORD", "Technik CSM")
 SOCIAL_POSTS_FILE = BASE_DIR / "social_posts.json"
 KNOWLEDGE_SUBMISSIONS_FILE = KNOWLEDGE_DIR / "csmsocial_submissions.md"
 SOCIAL_UPLOAD_DIR = BASE_DIR / "static" / "social-uploads"
+TECHNICAL_UPLOAD_DIR = BASE_DIR / "static" / "technical-uploads"
 SOCIAL_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+TECHNICAL_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 SOCIAL_ACTIVE_SESSIONS = {}
 SOCIAL_SESSION_TTL_SECONDS = 75
 SOCIAL_AGENT_TASK = None
@@ -706,6 +714,26 @@ async def create_technical_report(report: TechnicalReport):
     reports.append(entry)
     save_reports(reports)
     return {"report_id": report_id}
+
+
+@app.post("/api/technical-reports/{report_id}/attachment")
+async def add_technical_attachment(report_id: str, attachment: UploadFile = File(...)):
+    allowed_types = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "application/pdf": ".pdf"}
+    extension = allowed_types.get(attachment.content_type or "")
+    if not extension:
+        raise HTTPException(status_code=422, detail="Dozwolone są zdjęcia JPG, PNG, WebP lub PDF.")
+    content = await attachment.read(5 * 1024 * 1024 + 1)
+    if len(content) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Załącznik może mieć maksymalnie 5 MB.")
+    filename = f"{secrets.token_urlsafe(12)}{extension}"
+    (TECHNICAL_UPLOAD_DIR / filename).write_bytes(content)
+    reports = load_technical_reports()
+    for report in reports:
+        if report.get("id") == report_id:
+            report["attachment_url"] = f"/static/technical-uploads/{filename}"
+            save_reports(reports)
+            return {"report_id": report_id, "attachment_url": report["attachment_url"]}
+    raise HTTPException(status_code=404, detail="Nie znaleziono zgłoszenia.")
 
 
 @app.post("/api/technical-reports/inbox")
