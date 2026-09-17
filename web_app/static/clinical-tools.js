@@ -42,8 +42,9 @@ const scenarioSteps = [
   { prompt: 'Po ocenie ABCDE: co powinno zostać udokumentowane?', options: [['Wyniki, czas, działania i reakcję pacjenta', true], ['Tylko nazwisko pacjenta', false], ['Nic, jeśli pacjent czuje się lepiej', false]] }
 ];
 let scenarioIndex = 0;
-function renderScenario() { const step = scenarioSteps[scenarioIndex]; const prompt = document.getElementById('scenarioPrompt'); const options = document.getElementById('scenarioOptions'); if (!prompt || !options) return; prompt.textContent = step.prompt; options.innerHTML = step.options.map(([label, correct]) => `<button type="button" data-correct="${correct}">${label}</button>`).join(''); options.querySelectorAll('button').forEach((button) => button.addEventListener('click', () => { document.getElementById('scenarioFeedback').textContent = button.dataset.correct === 'true' ? 'Dobra decyzja. Przechodzimy dalej zgodnie z ABCDE.' : 'Zatrzymaj się i wróć do uporządkowanej oceny ABCDE.'; })); }
-document.getElementById('scenarioNext')?.addEventListener('click', () => { scenarioIndex = (scenarioIndex + 1) % scenarioSteps.length; renderScenario(); document.getElementById('scenarioFeedback').textContent = ''; });
+let scenarioScore = 0;
+function renderScenario() { const step = scenarioSteps[scenarioIndex]; const prompt = document.getElementById('scenarioPrompt'); const options = document.getElementById('scenarioOptions'); if (!prompt || !options) return; prompt.textContent = step.prompt; options.innerHTML = step.options.map(([label, correct]) => `<button type="button" data-correct="${correct}">${label}</button>`).join(''); options.querySelectorAll('button').forEach((button) => button.addEventListener('click', () => { const correct = button.dataset.correct === 'true'; document.getElementById('scenarioFeedback').textContent = correct ? 'Dobra decyzja. Przechodzimy dalej zgodnie z ABCDE.' : 'Zatrzymaj się i wróć do uporządkowanej oceny ABCDE.'; if (correct && !button.parentElement.dataset.answered) { scenarioScore += 1; button.parentElement.dataset.answered = 'true'; } document.getElementById('scenarioScore').textContent = `Wynik: ${scenarioScore}/3`; })); }
+document.getElementById('scenarioNext')?.addEventListener('click', () => { scenarioIndex = (scenarioIndex + 1) % scenarioSteps.length; if (scenarioIndex === 0) { scenarioCount += 1; localStorage.setItem('csmek-scenario-count', String(scenarioCount)); updateDashboard(); } renderScenario(); document.getElementById('scenarioFeedback').textContent = ''; document.getElementById('scenarioScore').textContent = `Wynik: ${scenarioScore}/3`; });
 renderScenario();
 
 const studyCards = [
@@ -62,7 +63,7 @@ const studyProgress = document.getElementById('studyProgress');
 const learningStats = document.getElementById('learningStats');
 function renderFlashcard() { const card = studyCards[flashcardIndex]; if (flashcardQuestion) flashcardQuestion.textContent = card[0]; if (flashcardAnswer) { flashcardAnswer.textContent = card[1]; flashcardAnswer.hidden = true; } if (flashcardReveal) flashcardReveal.textContent = 'Pokaż odpowiedź'; if (studyProgress) studyProgress.textContent = `Powtórzone: ${studyCount}`; if (learningStats) learningStats.textContent = `Nauka: ${studyCount} fiszek · ${scenarioCount} scenariuszy`; }
 flashcardReveal?.addEventListener('click', () => { flashcardAnswer.hidden = !flashcardAnswer.hidden; flashcardReveal.textContent = flashcardAnswer.hidden ? 'Pokaż odpowiedź' : 'Ukryj odpowiedź'; });
-function nextFlashcard() { studyCount += 1; localStorage.setItem('csmek-study-count', String(studyCount)); flashcardIndex = (flashcardIndex + 1) % studyCards.length; renderFlashcard(); }
+function nextFlashcard() { studyCount += 1; localStorage.setItem('csmek-study-count', String(studyCount)); flashcardIndex = (flashcardIndex + 1) % studyCards.length; renderFlashcard(); updateDashboard(); }
 document.getElementById('flashcardEasy')?.addEventListener('click', nextFlashcard);
 document.getElementById('flashcardHard')?.addEventListener('click', nextFlashcard);
 renderFlashcard();
@@ -73,9 +74,11 @@ document.getElementById('patientGenerate')?.addEventListener('click', () => {
   const complaint = document.getElementById('patientComplaint').value || 'brak skargi głównej';
   const priority = document.getElementById('patientPriority').value;
   const notes = document.getElementById('patientNotes').value || 'brak dodatkowych obserwacji';
-  document.getElementById('patientSummary').textContent = `Pacjent: ${age} lat, ${sex}. Skarga: ${complaint}. Priorytet: ${priority}. Notatki: ${notes}.`;
+  const vitals = ['patientPulse', 'patientRespiratory', 'patientSpo2', 'patientBp', 'patientTemp'].map((id) => document.getElementById(id)?.value).filter(Boolean);
+  document.getElementById('patientSummary').textContent = `Pacjent: ${age} lat, ${sex}. Skarga: ${complaint}. Priorytet: ${priority}. Parametry: ${vitals.length ? vitals.join(' · ') : 'brak'}. Notatki: ${notes}.`;
   scenarioCount += 1; localStorage.setItem('csmek-scenario-count', String(scenarioCount));
   if (learningStats) learningStats.textContent = `Nauka: ${studyCount} fiszek · ${scenarioCount} scenariuszy`;
+  updateDashboard();
 });
 document.getElementById('patientPrint')?.addEventListener('click', () => window.print());
 
@@ -91,3 +94,14 @@ document.getElementById('contrastToggle')?.addEventListener('click', () => { doc
 document.getElementById('fontSizeToggle')?.addEventListener('click', () => { document.body.classList.toggle('large-text'); localStorage.setItem('csmek-font-size', document.body.classList.contains('large-text') ? 'large' : 'normal'); });
 if (localStorage.getItem('csmek-contrast') === 'on') document.body.classList.add('high-contrast');
 if (localStorage.getItem('csmek-font-size') === 'large') document.body.classList.add('large-text');
+
+function updateDashboard() {
+  const favorites = JSON.parse(localStorage.getItem('csmek-favorite-answers') || '[]');
+  const values = { flashcards: studyCount, scenarios: scenarioCount, favorites: favorites.length };
+  document.getElementById('dashboardFlashcards').textContent = values.flashcards;
+  document.getElementById('dashboardScenarios').textContent = values.scenarios;
+  document.getElementById('dashboardFavorites').textContent = values.favorites;
+  document.getElementById('dashboardProgressBar').style.width = `${Math.min(100, (values.flashcards + values.scenarios) * 5)}%`;
+  document.getElementById('dashboardProgressLabel').textContent = values.flashcards + values.scenarios ? 'Dobra robota. Każda powtórka buduje regularność.' : 'Zacznij od jednej fiszki lub scenariusza.';
+}
+updateDashboard();
