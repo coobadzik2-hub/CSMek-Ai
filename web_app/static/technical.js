@@ -391,6 +391,14 @@ function openDetails(key) {
   }
   if (quickProblemLabel) quickProblemLabel.firstChild.textContent = detail.problemLabel;
   if (quickProblemInput) quickProblemInput.placeholder = detail.problemPlaceholder;
+  let diagnosticFields = document.getElementById('quickDiagnosticFields');
+  if (!diagnosticFields && simulatorQuickForm) {
+    diagnosticFields = document.createElement('div');
+    diagnosticFields.id = 'quickDiagnosticFields';
+    diagnosticFields.className = 'quick-diagnostic-fields';
+    diagnosticFields.innerHTML = '<label>Wpływ na zajęcia<select name="impact"><option>Brak wpływu na zajęcia</option><option>Utrudnia zajęcia</option><option>Blokuje zajęcia</option></select></label><label>Termin zajęć<input name="event_time" type="datetime-local"></label><label>Komunikat błędu<input name="error_message" placeholder="Jeśli pojawił się komunikat"></label><label>Co już sprawdzono?<textarea name="steps_taken" rows="3" placeholder="Zasilanie, przewody, restart..."></textarea></label><label>Zdjęcie lub zrzut<input name="attachment" type="file" accept="image/jpeg,image/png,image/webp,.pdf"></label>';
+    quickProblemLabel?.after(diagnosticFields);
+  }
   simulatorQuickForm?.classList.remove('hidden');
   modalReportButton?.classList.add('hidden');
   roomReadinessFields?.classList.toggle('hidden', key !== 'rooms');
@@ -448,11 +456,14 @@ simulatorQuickForm?.addEventListener('submit', async (event) => {
         category: serviceDetails[activeServiceKey].category,
         priority: 'Standardowy',
         location: values.subject,
-        description: `${readinessSummary} ${values.problem}`.trim()
+        description: `${readinessSummary} ${values.problem}`.trim(),
+        impact: values.impact || '', event_time: values.event_time || '', error_message: values.error_message || '', steps_taken: values.steps_taken || ''
       })
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.detail || 'Nie udało się zapisać zgłoszenia.');
+    const attachment = simulatorQuickForm.querySelector('[name="attachment"]')?.files?.[0];
+    if (attachment) { const upload = new FormData(); upload.append('attachment', attachment); await fetch(`/api/technical-reports/${encodeURIComponent(data.report_id)}/attachment`, { method: 'POST', body: upload }); }
     simulatorQuickResult.textContent = `Zgłoszenie ${data.report_id} zapisane. Zespół techniczny otrzyma opis problemu.`;
     simulatorQuickResult.hidden = false;
     simulatorQuickForm.reset();
@@ -481,7 +492,10 @@ updateReadiness();
 reportForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const submitButton = reportForm.querySelector('button[type="submit"]');
-  const formData = Object.fromEntries(new FormData(reportForm));
+  const rawFormData = new FormData(reportForm);
+  const attachment = rawFormData.get('attachment');
+  rawFormData.delete('attachment');
+  const formData = Object.fromEntries(rawFormData);
   submitButton.disabled = true;
   submitButton.innerHTML = 'Wysyłanie...';
   reportResult.hidden = true;
@@ -494,6 +508,7 @@ reportForm?.addEventListener('submit', async (event) => {
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.detail || 'Nie udało się zapisać zgłoszenia.');
+    if (attachment instanceof File && attachment.size) { const upload = new FormData(); upload.append('attachment', attachment); await fetch(`/api/technical-reports/${encodeURIComponent(data.report_id)}/attachment`, { method: 'POST', body: upload }); }
     reportResult.innerHTML = `<strong>Zgłoszenie ${data.report_id} zostało zapisane.</strong> Zespół techniczny otrzymał opis problemu. Zachowaj ten numer do kontaktu.`;
     reportResult.hidden = false;
     reportForm.reset();
