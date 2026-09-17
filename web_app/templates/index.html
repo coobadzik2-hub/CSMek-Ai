@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Umbot Clinical Console</title>
     <link rel="stylesheet" href="/static/styles.css?v=20260916-85" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0b6e69" />
   </head>
   <body>
     <div class="medical-background-symbols" aria-hidden="true">
@@ -311,3 +313,4 @@
     </main>
 
     <script src="/static/app.js?v=20260916-8"></script>
+    <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/static/service-worker.js');</script>
