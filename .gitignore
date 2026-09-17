@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+jarvis_input.wav
+nagranie.wav
+vosk-model-small-pl-0.22/
+web_app/static/social-uploads/*
+web_app/technical_reports.json
+web_app/social_posts.json

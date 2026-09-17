@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSMsocial | CSMek</title>
+    <link rel="stylesheet" href="/static/csmsocial.css?v=20260916-15" />
+  </head>
+  <body>
+    <div class="floating-reactions" aria-hidden="true">
+      <span class="reaction reaction-one">👍</span>
+      <span class="reaction reaction-two">💬</span>
+      <span class="reaction reaction-three">✨</span>
+      <span class="reaction reaction-four">❤️</span>
+      <span class="reaction reaction-five">🙌</span>
+      <span class="reaction reaction-six">👍</span>
+      <span class="reaction reaction-seven">⭐</span>
+      <span class="reaction reaction-eight">😊</span>
+    </div>
+    <main class="social-shell">
+      <header class="social-header">
+        <a class="social-back" href="/">← CSMek</a>
+        <div class="social-header-actions">
+          <span class="social-code">CSM / SOCIAL NODE</span>
+          <button id="socialThemeToggle" class="social-theme-toggle" type="button" aria-label="Włącz jasny tryb">☼ <span>Jasny</span></button>
+        </div>
+      </header>
+
+      <section class="social-hero">
+        <div>
+          <span class="social-kicker">CENTRUM SYMULACJI MEDYCZNEJ</span>
+          <h1>CSMsocial</h1>
+          <p>Anonimowa tablica studentów. Dziel się wydarzeniami, pytaniami i pomysłami związanymi z życiem Centrum Symulacji.</p>
+        </div>
+        <div class="social-signal"><span></span><strong>LIVE</strong><small><b id="activeMembers">1</b> aktywnych członków</small></div>
+      </section>
+
+      <nav class="social-tabs" aria-label="Sekcje CSMsocial">
+        <button class="social-tab is-active" type="button" data-tab="posts">Wpisy</button>
+        <button class="social-tab" type="button" data-tab="photos">Zdjęcia</button>
+        <button class="social-tab" type="button" data-tab="news">Aktualności</button>
+      </nav>
+
+      <section id="postsPanel" class="social-tab-panel is-active">
+      <div class="social-layout">
+        <section class="social-composer" aria-labelledby="composerTitle">
+          <div class="section-heading">
+            <span class="social-kicker">NOWY WPIS</span>
+            <h2 id="composerTitle">Zostaw wiadomość</h2>
+          </div>
+          <form id="socialPostForm">
+            <label>Podpis anonimowy <input name="author" maxlength="40" placeholder="Np. Studentka roku 2" /><small class="signature-note">Pamiętaj: podpis nie jest weryfikowany. Ktoś może wpisać dowolne imię lub pseudonim, dlatego nie traktuj go jako potwierdzonej tożsamości.</small></label>
+            <label>Treść wpisu <textarea name="content" maxlength="1200" rows="7" required placeholder="Co dzieje się w Centrum Symulacji?"></textarea></label>
+            <div class="composer-footer"><span>Wpis zostanie sprawdzony przed publikacją.</span><button class="publish-button" type="submit">Opublikuj <b>→</b></button></div>
+          </form>
+          <p id="socialFormStatus" class="social-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="social-feed-section" aria-labelledby="feedTitle">
+          <div class="feed-heading">
+            <div><span class="social-kicker">TABLICA CSM</span><h2 id="feedTitle">Najnowsze wpisy</h2></div>
+            <button id="refreshSocial" class="refresh-social" type="button" aria-label="Odśwież wpisy" title="Odśwież wpisy">↻</button>
+          </div>
+          <div id="socialFeed" class="social-feed" aria-live="polite"></div>
+        </section>
+      </div>
+      </section>
+
+      <section id="photosPanel" class="social-tab-panel photo-panel" hidden>
+        <div class="media-composer">
+          <div class="section-heading"><span class="social-kicker">NOWE ZDJĘCIE</span><h2>Podziel się kadrem z CSM</h2></div>
+          <form id="socialPhotoForm">
+            <label>Zdjęcie <input name="photo" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required /></label>
+            <label>Podpis <textarea name="caption" rows="3" maxlength="300" placeholder="Dodaj krótki opis zdjęcia (opcjonalnie)"></textarea></label>
+            <div class="composer-footer"><span>Zdjęcie zostanie dodane jako anonimowy post.</span><button class="publish-button" type="submit">Dodaj zdjęcie <b>→</b></button></div>
+          </form>
+          <p id="photoFormStatus" class="social-status" role="status" aria-live="polite"></p>
+        </div>
+        <div class="photo-feed-heading"><span class="social-kicker">GALERIA CSM</span><h2>Zdjęcia społeczności</h2></div>
+        <div id="photoFeed" class="photo-feed" aria-live="polite"></div>
+      </section>
+
+      <section id="newsPanel" class="social-tab-panel news-panel" hidden>
+        <div class="section-heading"><span class="social-kicker">CSM / NEWS DESK</span><h2>Aktualności i informacje</h2></div>
+        <div class="news-grid">
+          <article class="social-news-card"><span>Centrum Symulacji</span><h3>Nowe scenariusze zajęć praktycznych</h3><p>Sprawdź najnowsze informacje o ćwiczeniach, szkoleniach i wydarzeniach organizowanych w CSM.</p><small>Informacja CSM</small></article>
+          <article class="social-news-card"><span>Studenci</span><h3>Wspólna przestrzeń do wymiany doświadczeń</h3><p>CSMsocial łączy pytania, pomysły i codzienne momenty ze świata Centrum Symulacji.</p><small>CSMsocial</small></article>
+          <article class="social-news-card"><span>Wiedza</span><h3>Ciekawostki od agenta CSMek World</h3><p>Obserwuj kartę wpisów, aby znaleźć kolejne ciekawostki ze świata nauki i medycyny.</p><small>CSMek World</small></article>
+        </div>
+      </section>
+    </main>
+    <script src="/static/csmsocial.js?v=20260916-9"></script>
+  </body>
+</html>

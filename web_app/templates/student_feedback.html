@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anonimowa uwaga studenta | CSMek</title>
+    <link rel="stylesheet" href="/static/student-feedback.css?v=20260916-5" />
+  </head>
+  <body>
+    <main class="feedback-shell">
+      <header class="feedback-header">
+        <a class="feedback-back" href="/">← CSMek</a>
+        <span class="feedback-code">CSM / STUDENT VOICE</span>
+      </header>
+      <section class="feedback-hero">
+        <div class="feedback-copy">
+          <span class="feedback-kicker">ANONIMOWY KANAŁ OPINII</span>
+          <h1>Twoja uwaga pomaga ulepszać Centrum Symulacji.</h1>
+          <p>Podziel się opinią o zajęciach, salach, sprzęcie lub organizacji. Nie pytamy o imię, e-mail ani numer telefonu.</p>
+          <div class="availability-note"><span class="availability-dot"></span><strong>Kanał anonimowy działa 24/7</strong><small>Wyślij uwagę w dowolnym momencie.</small></div>
+        </div>
+        <div class="privacy-seal"><span>ANONIMOWE</span><strong>100%</strong><small>bez danych kontaktowych</small></div>
+      </section>
+      <section class="feedback-card">
+        <div class="card-heading"><span class="feedback-kicker">FORMULARZ STUDENTA</span><span class="required-note">* pola wymagane</span></div>
+        <form id="studentFeedbackForm">
+          <label>Temat uwagi<input name="subject" required maxlength="120" placeholder="Np. organizacja zajęć, sala, sprzęt" /></label>
+          <label>Kierunek studiów<select name="field_of_study" required><option value="">Wybierz kierunek, na którym obecnie studiujesz</option><option>Lekarski</option><option>Lekarsko-dentystyczny</option><option>Farmacja</option><option>Pielęgniarstwo</option><option>Położnictwo</option><option>Fizjoterapia</option><option>Ratownictwo medyczne</option><option>Analityka medyczna</option><option>Dietetyka</option><option>Elektroradiologia</option><option>Higiena stomatologiczna</option><option>Kosmetologia</option><option>Terapia zajęciowa</option><option>Inny kierunek</option></select></label>
+          <label>Kategoria<select name="topic" required><option value="">Wybierz obszar</option><option>Organizacja zajęć</option><option>Wyposażenie i sprzęt</option><option>Stan sali</option><option>Symulatory</option><option>Atmosfera i komfort</option><option>Inne</option></select></label>
+          <label>Twoja uwaga<textarea name="description" rows="8" required maxlength="3000" placeholder="Napisz, co działa dobrze albo co warto poprawić..."></textarea></label>
+          <div class="feedback-footer"><span>Wysłanie nie wymaga logowania ani danych osobowych.</span><button type="submit">Wyślij anonimowo <b>→</b></button></div>
+        </form>
+        <div id="feedbackResult" class="feedback-result" role="status" aria-live="polite" hidden></div>
+      </section>
+      <footer class="feedback-footer-note">Wiadomość trafi do skrzynki technicznej jako kategoria „Anonimowa uwaga studenta”.</footer>
+    </main>
+    <script src="/static/student-feedback.js?v=20260916-4"></script>
+  </body>
+</html>

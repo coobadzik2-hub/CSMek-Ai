@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zespół techniczny | Centrum Symulacji Medycznej</title>
+    <link rel="stylesheet" href="/static/technical.css?v=20260916-23" />
+  </head>
+  <body>
+    <main class="technical-shell">
+      <header class="technical-header">
+        <div class="header-purpose"><div class="city-scene" aria-hidden="true"><i class="city-moon"></i><i class="city-building city-building-one"></i><i class="city-building city-building-two"></i><i class="city-building city-building-three"></i><i class="city-building city-building-four"></i><i class="city-lights"></i></div><div class="title-bookmark"><span>STRONA ZESPOŁU TECHNICZNEGO</span><strong>Zespół techniczny</strong><em>Centrum Symulacji Medycznej · Lublin</em></div></div>
+        <div class="header-meta"><div class="team-presence" id="teamPresence" aria-live="polite"><span class="presence-dot"></span><span><small>STATUS ZESPOŁU</small><strong id="teamPresenceText">Sprawdzam obecność...</strong></span></div></div>
+      </header>
+      <nav class="header-tools" aria-label="Nawigacja zespołu"><button id="teamToggle" class="page-switch team-page-button" type="button" aria-label="Pokaż zespół Centrum Symulacji Medycznej">Zespół CSM</button><button id="inboxToggle" class="page-switch inbox-page-button" type="button" aria-label="Otwórz skrzynkę zgłoszeń">Skrzynka zgłoszeń</button><button id="teamThemeToggle" class="page-switch theme-page-button" type="button" aria-label="Przełącz tryb jasny i ciemny">Jasny</button><button id="homePageToggle" class="page-switch" type="button" aria-label="Wróć do strony CSMek">CSMek</button></nav>
+
+      <section class="hero-section">
+        <div class="hero-copy">
+          <div class="hero-location" aria-label="Lokalizacja strony"><span>UMLUB</span><b>/</b><span>CSM LUBLIN</span><b>/</b><strong>ZESPÓŁ TECHNICZNY</strong></div>
+          <span class="kicker">CENTRUM SYMULACJI MEDYCZNEJ · WSPARCIE TECHNICZNE</span>
+          <h1><span class="hero-title-label">Zespół techniczny</span><span class="hero-title-place">Centrum Symulacji Medycznej <em>Lublin</em></span></h1>
+          <p>Jedno miejsce do zgłaszania usterek, konsultacji sprzętowych i szybkiej kontroli gotowości sal.</p>
+          <a class="primary-action" href="#report">Zgłoś problem <span>↓</span></a>
+        </div>
+        <div class="team-photo-panel" id="teamPhotoPanel" role="button" tabindex="0" aria-label="Otwórz listę członków zespołu technicznego">
+          <div class="team-photo-strip"><img class="team-photo-image" data-member-index="2" src="https://csm.umlub.pl/assets/img/team/SLa.jpg" alt="Otwórz profil Sławomira Łakomego" loading="lazy"><img class="team-photo-image" data-member-index="5" src="https://csm.umlub.pl/assets/img/team/PK.jpg" alt="Otwórz profil Patrycji Korulczyk" loading="lazy"><img class="team-photo-image" data-member-index="8" src="https://csm.umlub.pl/assets/img/team/MF.jpg" alt="Otwórz profil Michała Fornala" loading="lazy"><img class="team-photo-image" data-member-index="9" src="https://csm.umlub.pl/assets/img/team/GA.jpg" alt="Otwórz profil Grzegorza Aksamirskiego" loading="lazy"><img class="team-photo-image" data-member-index="15" src="https://csm.umlub.pl/assets/img/team/ML.jpg" alt="Otwórz profil Marcelego Łuczki" loading="lazy"></div>
+          <div class="team-photo-caption"><span>CSM / TECHNICAL TEAM</span><strong>Zespół techniczny</strong><small>Obsługa symulatorów, elektroniki i sal dydaktycznych</small><button id="otherMembersButton" class="other-members-button" type="button">Inni członkowie <b>↻</b></button></div>
+        </div>
+      </section>
+
+      <section class="service-grid" aria-label="Zakres wsparcia zespołu technicznego">
+        <button class="service-window" type="button" data-window="simulators">
+          <span class="window-number">01 / 03</span><span class="window-icon">◉</span><h2>Symulatory wysokiej wierności</h2><p>Przygotowanie, konfiguracja i pomoc podczas zajęć z użyciem zaawansowanych symulatorów.</p><span class="window-link">Otwórz zakres <b>↗</b></span>
+        </button>
+        <button class="service-window" type="button" data-window="electronics">
+          <span class="window-number">02 / 03</span><span class="window-icon">⌁</span><h2>Elektronika i wyposażenie</h2><p>Wsparcie przy urządzeniach, połączeniach, zasilaniu oraz elementach technicznych stanowisk.</p><span class="window-link">Otwórz zakres <b>↗</b></span>
+        </button>
+        <button class="service-window" type="button" data-window="rooms">
+          <span class="window-number">03 / 03</span><span class="window-icon">□</span><h2>Gotowość sali</h2><p>Sprawdzenie miejsc siedzących, obrazu, dźwięku i możliwości wyświetlenia prezentacji.</p><span class="window-link">Otwórz zakres <b>↗</b></span>
+        </button>
+      </section>
+
+      <section class="workspace-grid">
+        <section class="report-panel" id="report">
+          <div class="section-heading"><div><span class="kicker">FORMULARZ UWAG</span><h2>Podziel się uwagą o Centrum Symulacji.</h2></div><span class="form-index">CSM / FEEDBACK</span></div>
+          <p class="section-intro">Masz pomysł, sugestię lub uwagę organizacyjną? Napisz do zespołu, a zgłoszenie trafi do osobnej kategorii w skrzynce.</p>
+          <form id="reportForm">
+            <input type="hidden" name="category" value="Uwagi dotyczące Centrum Symulacji" />
+            <div class="field-row"><label>Imię i nazwisko<input name="reporter" required placeholder="Jak możemy się z Tobą skontaktować?" /></label><label>E-mail lub telefon<input name="contact" required placeholder="Dane kontaktowe" /></label></div>
+            <div class="field-row"><label>Priorytet<select name="priority"><option>Standardowy</option><option>Ważna uwaga</option><option>Pilne przed zajęciami</option></select></label><label>Temat uwagi<input name="location" required placeholder="Np. organizacja zajęć, wyposażenie, komfort pracy" /></label></div>
+            <label>Treść uwagi<textarea name="description" rows="6" required placeholder="Opisz swoją uwagę, pomysł albo sugestię dotyczącą Centrum Symulacji."></textarea></label>
+            <div class="form-footer"><span><i class="required-dot">*</i> Pola wymagane</span><button class="submit-button" type="submit">Wyślij zgłoszenie <span>→</span></button></div>
+          </form>
+          <div id="reportResult" class="report-result" role="status" aria-live="polite" hidden></div>
+        </section>
+
+      </section>
+
+      <footer class="technical-footer"><span>CSM / TECHNICAL DESK / LUBLIN</span><span>W sytuacji zagrożenia życia zadzwoń pod 112. Ten formularz służy wyłącznie do zgłoszeń technicznych.</span></footer>
+    </main>
+
+    <div class="detail-modal hidden" id="detailModal" aria-hidden="true"><div class="modal-backdrop" data-close-modal="true"></div><section class="modal-window" id="categoryModalWindow" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" id="closeModal" type="button" aria-label="Zamknij">×</button><span class="kicker" id="modalKicker">ZGŁOSZENIE TECHNICZNE</span><div id="simmanVisual" class="simman-visual hidden" aria-label="Ilustracja symulatora SimMan 3G"><div class="simman-head"></div><div class="simman-torso"></div><div class="simman-arm simman-arm-left"></div><div class="simman-arm simman-arm-right"></div><div class="simman-leg simman-leg-left"></div><div class="simman-leg simman-leg-right"></div><span>SIMMAN 3G</span></div><h2 id="modalTitle"></h2><p id="modalDescription"></p><ul id="modalList" class="hidden"></ul><form id="simulatorQuickForm" class="simulator-quick-form"><label id="quickSubjectLabel">Dotyczy<input id="quickSubjectInput" name="subject" required /></label><div id="roomReadinessFields" class="room-readiness-fields hidden"><label>Miejsca siedzące<select name="seating"><option value="jest">Jest wystarczająco</option><option value="brak">Brakuje miejsc</option></select></label><label>Możliwość prezentacji<select name="presentation"><option value="jest">Jest możliwa</option><option value="brak">Nie jest możliwa</option></select></label><label>Potrzebny sprzęt<select id="equipmentStatus" name="equipment"><option value="jest">Jest dostępny</option><option value="brak">Brakuje sprzętu</option></select></label><label id="equipmentDetailsLabel" class="hidden">Jaki sprzęt jest potrzebny?<input name="equipment_details" placeholder="Np. projektor, laptop, mikrofon" /></label></div><label id="quickProblemLabel">Na czym polega problem?<textarea id="quickProblemInput" name="problem" rows="5" required></textarea></label><button class="modal-action" type="submit">Wyślij zgłoszenie <span>→</span></button><div id="simulatorQuickResult" class="quick-result" role="status" aria-live="polite" hidden></div></form><button class="modal-action hidden" id="modalReport" type="button">Przejdź do zgłoszenia <span>↓</span></button></section></div>
+    <div class="inbox-modal hidden" id="inboxModal" aria-hidden="true"><div class="modal-backdrop" data-close-inbox="true"></div><section class="inbox-window" role="dialog" aria-modal="true" aria-labelledby="inboxTitle"><button class="modal-close" id="closeInbox" type="button" aria-label="Zamknij skrzynkę">×</button><div class="mailbox-visual" aria-hidden="true"><div class="mailbox-body"><i class="mailbox-flag"></i><span>CSM</span></div></div><span class="kicker">CENTRUM ZGŁOSZEŃ</span><h2 id="inboxTitle">Skrzynka techniczna</h2><p class="inbox-intro">Wpisz hasło zespołu, aby zobaczyć zgłoszenia oczekujące na obsługę.</p><form id="inboxPasswordForm" class="inbox-password-form"><label>Hasło dostępu<input id="inboxPassword" type="password" autocomplete="current-password" required placeholder="Wpisz hasło" /></label><button class="modal-action" type="submit">Otwórz skrzynkę <span>→</span></button><div id="inboxLoginResult" class="quick-result" role="alert" aria-live="polite" hidden></div></form><div id="inboxContent" class="inbox-content hidden"><div class="inbox-toolbar"><span id="inboxCount">0 zgłoszeń</span><button id="inboxRefresh" type="button" class="page-switch">Odśwież</button></div><div id="inboxList" class="inbox-list"></div></div></section></div>
+    <div class="team-modal hidden" id="teamModal" aria-hidden="true"><div class="modal-backdrop" data-close-team="true"></div><section class="team-window" role="dialog" aria-modal="true" aria-labelledby="teamTitle"><button class="modal-close" id="closeTeam" type="button" aria-label="Zamknij zespół">×</button><div class="team-window-heading"><span class="kicker">CENTRUM SYMULACJI MEDYCZNEJ · LUBLIN</span><h2 id="teamTitle">Zespół CSM</h2><p>Osoby odpowiedzialne za organizację, zaplecze techniczne i realizację symulacji medycznej.</p></div><div id="teamList" class="team-list"></div><footer class="team-source">Źródło: <a href="https://csm.umlub.pl/team.html" target="_blank" rel="noreferrer">oficjalna strona Zespołu CSM</a> · weryfikacja: 16.09.2026</footer></section></div>
+    <div class="member-modal hidden" id="memberModal" aria-hidden="true"><div class="modal-backdrop" data-close-member="true"></div><section class="member-window" role="dialog" aria-modal="true" aria-labelledby="memberTitle"><button class="modal-close" id="closeMember" type="button" aria-label="Zamknij informacje o osobie">×</button><div class="member-detail-grid"><img id="memberImage" src="" alt="" /><div><span class="kicker">PROFIL CZŁONKA ZESPOŁU CSM</span><h2 id="memberTitle"></h2><p id="memberRole" class="member-detail-role"></p><p id="memberBio" class="member-detail-bio"></p></div></div><footer class="team-source">Źródło: <a href="https://csm.umlub.pl/team.html" target="_blank" rel="noreferrer">oficjalna strona Zespołu CSM</a></footer></section></div>
+    <script src="/static/technical.js?v=20260916-18"></script>
+  </body>
+</html>

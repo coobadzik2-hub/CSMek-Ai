@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wzbogacanie wiedzy agenta | CSMek</title>
+    <link rel="stylesheet" href="/static/knowledge.css?v=20260916-1" />
+  </head>
+  <body>
+    <main class="knowledge-shell">
+      <header class="knowledge-header">
+        <a href="/" class="knowledge-back">← CSMek</a>
+        <span class="knowledge-code">CSM / KNOWLEDGE NODE</span>
+      </header>
+      <section class="knowledge-hero">
+        <span class="knowledge-kicker">PAMIĘĆ AGENTA</span>
+        <h1>Wzbogać wiedzę CSMeka</h1>
+        <p>Dodaj sprawdzone informacje, procedury lub materiały tekstowe, które agent będzie mógł wykorzystać w kolejnych odpowiedziach.</p>
+      </section>
+      <div class="knowledge-grid">
+        <section class="knowledge-card">
+          <span class="knowledge-kicker">NOWA INFORMACJA</span>
+          <h2>Wpisz zdanie lub notatkę</h2>
+          <form id="knowledgeTextForm">
+            <textarea name="content" rows="9" maxlength="10000" required placeholder="Np. W Centrum Symulacji sala 204 jest przeznaczona do ćwiczeń z ALS."></textarea>
+            <div class="knowledge-form-footer"><small>Treść zostanie sprawdzona pod kątem wulgaryzmów i obraźliwych określeń przed zapisem.</small><button type="submit">Zapamiętaj <b>→</b></button></div>
+          </form>
+          <p id="knowledgeTextStatus" class="knowledge-status" role="status" aria-live="polite"></p>
+        </section>
+        <section class="knowledge-card">
+          <span class="knowledge-kicker">MATERIAŁ TEKSTOWY</span>
+          <h2>Dodaj plik</h2>
+          <form id="knowledgeFileForm">
+            <label class="file-drop"><input name="file" type="file" accept=".txt,.md,.csv,.json" required /><strong>Wybierz plik tekstowy</strong><span>TXT, MD, CSV lub JSON · maks. 1 MB</span></label>
+            <div class="knowledge-form-footer"><small>Plik zostanie sprawdzony pod kątem wulgaryzmów i obraźliwych określeń przed zapisem.</small><button type="submit">Dodaj plik <b>→</b></button></div>
+          </form>
+          <p id="knowledgeFileStatus" class="knowledge-status" role="status" aria-live="polite"></p>
+        </section>
+      </div>
+      <aside class="knowledge-note"><strong>Ważne</strong><span>Dodawaj informacje, które mogą być bezpiecznie wykorzystywane przez agenta. Nie przesyłaj haseł, kluczy API ani danych osobowych.</span></aside>
+    </main>
+    <script src="/static/knowledge.js?v=20260916-1"></script>
+  </body>
+</html>
