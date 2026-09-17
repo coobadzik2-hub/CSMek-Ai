@@ -13,6 +13,7 @@ import json
 import os
 import random
 import secrets
+import sqlite3
 import unicodedata
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -93,8 +94,9 @@ class KnowledgeTextRequest(BaseModel):
     content: str
 
 
+DATABASE_FILE = Path(os.getenv("CSMEK_DATABASE_FILE", str(BASE_DIR / "csmek.sqlite3")))
 REPORTS_FILE = BASE_DIR / "technical_reports.json"
-INBOX_PASSWORD = "Technik CSM"
+INBOX_PASSWORD = os.getenv("CSMEK_ADMIN_PASSWORD", "Technik CSM")
 SOCIAL_POSTS_FILE = BASE_DIR / "social_posts.json"
 KNOWLEDGE_SUBMISSIONS_FILE = KNOWLEDGE_DIR / "csmsocial_submissions.md"
 SOCIAL_UPLOAD_DIR = BASE_DIR / "static" / "social-uploads"
@@ -122,7 +124,57 @@ SOCIAL_PROFANITY = {
     "idiota", "idiotka", "debil", "debilu", "kretyn", "kretynka",
     "matoł", "matol", "frajer", "szmata", "dziwka", "prostak", "głupek", "glupek"
 }
-INBOX_PASSWORD = "Technik CSM"
+def database_connection():
+    connection = sqlite3.connect(DATABASE_FILE)
+    connection.row_factory = sqlite3.Row
+    return connection
+
+
+def initialize_database():
+    with database_connection() as connection:
+        connection.executescript("""
+            CREATE TABLE IF NOT EXISTS social_posts (id TEXT PRIMARY KEY, payload TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS technical_reports (id TEXT PRIMARY KEY, payload TEXT NOT NULL);
+        """)
+
+
+def load_reports():
+    with database_connection() as connection:
+        return [json.loads(row["payload"]) for row in connection.execute("SELECT payload FROM technical_reports ORDER BY rowid")]
+
+
+def save_reports(reports):
+    with database_connection() as connection:
+        connection.execute("DELETE FROM technical_reports")
+        connection.executemany("INSERT INTO technical_reports (id, payload) VALUES (?, ?)", [(item["id"], json.dumps(item, ensure_ascii=False)) for item in reports])
+
+
+def load_database_posts():
+    with database_connection() as connection:
+        return [json.loads(row["payload"]) for row in connection.execute("SELECT payload FROM social_posts ORDER BY rowid")]
+
+
+def save_database_posts(posts):
+    with database_connection() as connection:
+        connection.execute("DELETE FROM social_posts")
+        connection.executemany("INSERT INTO social_posts (id, payload) VALUES (?, ?)", [(item["id"], json.dumps(item, ensure_ascii=False)) for item in posts])
+
+
+def load_technical_reports():
+    try:
+        reports = load_reports()
+        if reports:
+            return reports
+        if REPORTS_FILE.exists():
+            reports = json.loads(REPORTS_FILE.read_text(encoding="utf-8"))
+            save_reports(reports if isinstance(reports, list) else [])
+            return reports if isinstance(reports, list) else []
+    except (OSError, json.JSONDecodeError, sqlite3.Error):
+        return []
+    return []
+
+
+initialize_database()
 
 
 def load_library_items():
@@ -227,17 +279,21 @@ def knowledge_text_is_acceptable(content: str) -> bool:
 
 
 def load_social_posts():
-    if not SOCIAL_POSTS_FILE.exists():
-        return []
     try:
-        posts = json.loads(SOCIAL_POSTS_FILE.read_text(encoding="utf-8"))
-        return posts if isinstance(posts, list) else []
-    except (OSError, json.JSONDecodeError):
+        posts = load_database_posts()
+        if posts:
+            return posts
+        if SOCIAL_POSTS_FILE.exists():
+            posts = json.loads(SOCIAL_POSTS_FILE.read_text(encoding="utf-8"))
+            save_database_posts(posts if isinstance(posts, list) else [])
+            return posts if isinstance(posts, list) else []
+    except (OSError, json.JSONDecodeError, sqlite3.Error):
         return []
+    return []
 
 
 def save_social_posts(posts):
-    SOCIAL_POSTS_FILE.write_text(json.dumps(posts, ensure_ascii=False, indent=2), encoding="utf-8")
+    save_database_posts(posts)
 
 
 def active_social_members():
@@ -341,6 +397,25 @@ async def stop_social_agent():
         SOCIAL_AGENT_TASK.cancel()
     if SOCIAL_AGENT_REPLY_TASK:
         SOCIAL_AGENT_REPLY_TASK.cancel()
+
+
+@app.get("/healthz")
+async def healthz():
+    with database_connection() as connection:
+        connection.execute("SELECT 1")
+    return {"status": "ok", "service": "csmek"}
+
+
+@app.get("/manifest.webmanifest")
+async def manifest():
+    return {"name": "CSMek Clinical Console", "short_name": "CSMek", "start_url": "/", "display": "standalone", "background_color": "#071114", "theme_color": "#0b6e69", "icons": []}
+
+
+@app.get("/api/admin/backup")
+async def admin_backup(access: InboxAccessRequest):
+    if not secrets.compare_digest(access.password, INBOX_PASSWORD):
+        raise HTTPException(status_code=401, detail="Nieprawidłowe hasło.")
+    return {"reports": load_technical_reports(), "posts": load_social_posts(), "created_at": datetime.now().isoformat(timespec="seconds")}
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -617,12 +692,7 @@ async def create_technical_report(report: TechnicalReport):
     if category_key == "uwagi dotyczace centrum symulacji" and (not report.reporter.strip() or not report.contact.strip()):
         raise HTTPException(status_code=422, detail="Dla uwag dotyczących Centrum Symulacji wymagane są dane kontaktowe.")
 
-    reports = []
-    if REPORTS_FILE.exists():
-        try:
-            reports = json.loads(REPORTS_FILE.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            reports = []
+    reports = load_technical_reports()
 
     report_id = f"TECH-{datetime.now().strftime('%Y%m%d')}-{len(reports) + 1:03d}"
     entry = {
@@ -632,7 +702,7 @@ async def create_technical_report(report: TechnicalReport):
         **report.model_dump()
     }
     reports.append(entry)
-    REPORTS_FILE.write_text(json.dumps(reports, ensure_ascii=False, indent=2), encoding="utf-8")
+    save_reports(reports)
     return {"report_id": report_id}
 
 
@@ -641,12 +711,7 @@ async def technical_reports_inbox(access: InboxAccessRequest):
     if not secrets.compare_digest(access.password, INBOX_PASSWORD):
         raise HTTPException(status_code=401, detail="Nieprawidłowe hasło.")
 
-    reports = []
-    if REPORTS_FILE.exists():
-        try:
-            reports = json.loads(REPORTS_FILE.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            reports = []
+    reports = load_technical_reports()
     return {"reports": list(reversed(reports))}
 
 
