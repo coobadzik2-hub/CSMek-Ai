@@ -143,6 +143,16 @@ button, input, textarea { min-height: 44px; }
 .library-search { width: 100%; margin: 12px 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--textarea-bg); color: var(--text); }
 .answer-actions { display: flex; gap: 8px; margin: 12px 0; }
 .answer-actions button { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: var(--button-secondary); color: var(--text); cursor: pointer; }
+.personal-library { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.personal-library-heading, .personal-library-tabs { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.personal-library-heading h3 { margin: 0; }
+.personal-library-heading span { color: var(--muted); font-size: .68rem; }
+.personal-library-tabs { justify-content: flex-start; margin: 10px 0; }
+.personal-tab { border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); padding: 6px 2px; cursor: pointer; }
+.personal-tab.is-active { border-color: var(--accent-strong); color: var(--text); }
+.personal-library-list { display: grid; gap: 7px; }
+.personal-entry { display: grid; gap: 3px; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; text-align: left; background: var(--panel-soft); color: var(--text); cursor: pointer; }
+.personal-entry small, .personal-empty { color: var(--muted); }
 @media (max-width: 760px) { .medical-background-symbols { display: none; } }
 @media (max-width: 760px) {
   body { padding: 8px 0 72px; }
