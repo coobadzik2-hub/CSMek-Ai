@@ -66,7 +66,9 @@ class TechnicalReport(BaseModel):
 class TechnicalReportStatusUpdate(BaseModel):
     password: str
     report_id: str
-    completed: bool
+    completed: bool | None = None
+    status: str | None = None
+    assigned_to: str | None = None
 
 
 class InboxAccessRequest(BaseModel):
@@ -724,9 +726,15 @@ async def update_technical_report_status(update: TechnicalReportStatusUpdate):
 
     for report in reports:
         if report.get("id") == update.report_id:
-            report["completed"] = update.completed
+            if update.completed is not None:
+                report["completed"] = update.completed
+            if update.status:
+                report["status"] = update.status
+                report["completed"] = update.status == "Zakończone"
+            if update.assigned_to is not None:
+                report["assigned_to"] = update.assigned_to
             save_reports(reports)
-            return {"report_id": update.report_id, "completed": update.completed}
+            return {"report_id": update.report_id, "completed": report.get("completed", False), "status": report.get("status", "Nowe"), "assigned_to": report.get("assigned_to", "Nieprzypisane")}
 
     raise HTTPException(status_code=404, detail="Nie znaleziono zgłoszenia.")
 
