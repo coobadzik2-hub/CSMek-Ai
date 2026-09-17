@@ -398,8 +398,9 @@ function openDetails(key) {
     diagnosticFields = document.createElement('div');
     diagnosticFields.id = 'quickDiagnosticFields';
     diagnosticFields.className = 'quick-diagnostic-fields';
-    diagnosticFields.innerHTML = '<label>Wpływ na zajęcia<select name="impact"><option>Brak wpływu na zajęcia</option><option>Utrudnia zajęcia</option><option>Blokuje zajęcia</option></select></label><label>Termin zajęć<input name="event_time" type="datetime-local"></label><label>Komunikat błędu<input name="error_message" placeholder="Jeśli pojawił się komunikat"></label><label>Co już sprawdzono?<textarea name="steps_taken" rows="3" placeholder="Zasilanie, przewody, restart..."></textarea></label><label>Zdjęcie lub zrzut<input name="attachment" type="file" accept="image/jpeg,image/png,image/webp,.pdf"></label>';
+    diagnosticFields.innerHTML = '<div class="quick-issue-chips"><span>Szybki wybór:</span><button type="button" data-issue="Brak zasilania">Brak zasilania</button><button type="button" data-issue="Brak obrazu">Brak obrazu</button><button type="button" data-issue="Brak dźwięku">Brak dźwięku</button><button type="button" data-issue="Urządzenie nie uruchamia się">Nie uruchamia się</button></div><div class="field-row"><label>Wpływ na zajęcia<select name="impact"><option>Brak wpływu na zajęcia</option><option>Utrudnia zajęcia</option><option>Blokuje zajęcia</option></select></label><label>Termin zajęć<input name="event_time" type="datetime-local"></label></div><div class="field-row"><label>Model / nr inwentarzowy<input name="equipment_id" placeholder="Jeśli znasz"></label><label>Komunikat błędu<input name="error_message" placeholder="Jeśli pojawił się komunikat"></label></div><label>Co już sprawdzono?<textarea name="steps_taken" rows="3" placeholder="Zasilanie, przewody, restart..."></textarea></label><label>Zdjęcie lub zrzut<input name="attachment" type="file" accept="image/jpeg,image/png,image/webp,.pdf"></label>';
     quickProblemLabel?.after(diagnosticFields);
+    diagnosticFields.querySelectorAll('[data-issue]').forEach((button) => button.addEventListener('click', () => { quickProblemInput.value = `${quickProblemInput.value}${quickProblemInput.value ? '\n' : ''}${button.dataset.issue}`; quickProblemInput.focus(); }));
   }
   simulatorQuickForm?.classList.remove('hidden');
   modalReportButton?.classList.add('hidden');
@@ -409,6 +410,9 @@ function openDetails(key) {
     equipmentDetailsLabel?.classList.add('hidden');
   }
   if (simulatorQuickResult) simulatorQuickResult.hidden = true;
+  const draft = JSON.parse(localStorage.getItem(`technical-draft-${key}`) || '{}');
+  Object.entries(draft).forEach(([name, value]) => { const field = simulatorQuickForm?.elements.namedItem(name); if (field && typeof value === 'string') field.value = value; });
+  simulatorQuickForm?.querySelectorAll('input, textarea, select').forEach((field) => field.addEventListener('input', () => { const values = Object.fromEntries(new FormData(simulatorQuickForm)); localStorage.setItem(`technical-draft-${key}`, JSON.stringify(values)); }, { once: false }));
   modal.classList.remove('hidden');
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
@@ -469,6 +473,7 @@ simulatorQuickForm?.addEventListener('submit', async (event) => {
     simulatorQuickResult.textContent = `Zgłoszenie ${data.report_id} zapisane. Zespół techniczny otrzyma opis problemu.`;
     simulatorQuickResult.hidden = false;
     simulatorQuickForm.reset();
+    localStorage.removeItem(`technical-draft-${activeServiceKey}`);
   } catch (error) {
     simulatorQuickResult.textContent = error.message;
     simulatorQuickResult.hidden = false;
@@ -514,6 +519,7 @@ reportForm?.addEventListener('submit', async (event) => {
     reportResult.innerHTML = `<strong>Zgłoszenie ${data.report_id} zostało zapisane.</strong> Zespół techniczny otrzymał opis problemu. Zachowaj ten numer do śledzenia statusu.`;
     reportResult.hidden = false;
     reportForm.reset();
+    localStorage.removeItem(reportDraftKey);
   } catch (error) {
     reportResult.innerHTML = `<strong>Nie udało się wysłać zgłoszenia.</strong> ${error.message}`;
     reportResult.hidden = false;
@@ -522,6 +528,13 @@ reportForm?.addEventListener('submit', async (event) => {
     submitButton.innerHTML = 'Wyślij zgłoszenie <span>→</span>';
   }
 });
+
+const reportDraftKey = 'technical-report-draft';
+if (reportForm) {
+  const draft = JSON.parse(localStorage.getItem(reportDraftKey) || '{}');
+  Object.entries(draft).forEach(([name, value]) => { const field = reportForm.elements.namedItem(name); if (field && typeof value === 'string') field.value = value; });
+  reportForm.querySelectorAll('input:not([type="file"]), textarea, select').forEach((field) => field.addEventListener('input', () => { localStorage.setItem(reportDraftKey, JSON.stringify(Object.fromEntries(new FormData(reportForm)))); }));
+}
 
 trackingForm?.addEventListener('submit', async (event) => {
   event.preventDefault();

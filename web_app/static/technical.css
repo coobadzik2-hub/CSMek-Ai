@@ -35,6 +35,9 @@
 } 
 .quick-diagnostic-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; margin: 16px 0 6px; padding: 16px; border: 1px solid rgba(7,91,137,.16); border-radius: 18px; background: linear-gradient(145deg, rgba(231,241,247,.72), rgba(246,250,250,.82)); box-shadow: inset 0 1px 0 rgba(255,255,255,.8); }
 .quick-diagnostic-fields label:last-child { grid-column: 1 / -1; }
+.quick-issue-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; grid-column: 1 / -1; margin-bottom: 10px; color: var(--muted); font-size: .68rem; font-weight: 800; }
+.quick-issue-chips button { padding: 6px 9px; border: 1px solid rgba(7,91,137,.2); border-radius: 999px; color: var(--institutional-blue-dark); background: rgba(255,255,255,.8); font: inherit; font-weight: 800; cursor: pointer; }
+.quick-issue-chips button:hover { border-color: var(--institutional-blue); color: var(--institutional-blue); background: white; }
 .inbox-item a { color: var(--institutional-blue); font-weight: 800; }
 .inbox-window::before { 
   content: ""; 
