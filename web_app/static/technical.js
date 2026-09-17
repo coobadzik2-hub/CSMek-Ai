@@ -87,7 +87,13 @@ const inboxContent = document.getElementById('inboxContent');
 const inboxList = document.getElementById('inboxList');
 const inboxCount = document.getElementById('inboxCount');
 const inboxRefresh = document.getElementById('inboxRefresh');
+const inboxSearch = document.getElementById('inboxSearch');
+const inboxStatusFilter = document.getElementById('inboxStatusFilter');
+const inboxPriorityFilter = document.getElementById('inboxPriorityFilter');
+const inboxSort = document.getElementById('inboxSort');
+const inboxStats = document.getElementById('inboxStats');
 let inboxAccessPassword = '';
+let inboxReports = [];
 
 homePageToggle?.addEventListener('click', () => {
   window.location.href = '/';
@@ -239,23 +245,57 @@ function escapeHtml(value) {
 }
 
 function renderInbox(reports) {
-  inboxCount.textContent = `${reports.length} ${reports.length === 1 ? 'zgłoszenie' : 'zgłoszeń'}`;
-  if (!reports.length) {
+  inboxReports = reports;
+  const query = (inboxSearch?.value || '').trim().toLocaleLowerCase('pl-PL');
+  const status = inboxStatusFilter?.value || 'all';
+  const priority = inboxPriorityFilter?.value || 'all';
+  const priorityOrder = { 'Pilne przed zajęciami': 0, 'Ważna uwaga': 1, Standardowy: 2 };
+  const filtered = reports.filter((report) => {
+    const reportStatus = report.status || (report.completed ? 'Zakończone' : 'Nowe');
+    const haystack = `${report.id} ${report.category} ${report.location} ${report.description} ${report.assigned_to || ''}`.toLocaleLowerCase('pl-PL');
+    return (!query || haystack.includes(query)) && (status === 'all' || reportStatus === status) && (priority === 'all' || report.priority === priority);
+  }).sort((first, second) => {
+    if (inboxSort?.value === 'oldest') return first.created_at.localeCompare(second.created_at);
+    if (inboxSort?.value === 'priority') return (priorityOrder[first.priority] ?? 9) - (priorityOrder[second.priority] ?? 9);
+    return second.created_at.localeCompare(first.created_at);
+  });
+  inboxCount.textContent = `${filtered.length} z ${reports.length} zgłoszeń`;
+  if (inboxStats) {
+    const active = reports.filter((report) => !(report.completed || report.status === 'Zakończone')).length;
+    const urgent = reports.filter((report) => report.priority === 'Pilne przed zajęciami' && !report.completed).length;
+    inboxStats.innerHTML = `<span><strong>${active}</strong> aktywnych</span><span><strong>${urgent}</strong> pilnych</span><span><strong>${reports.filter((report) => report.completed).length}</strong> zakończonych</span>`;
+  }
+  if (!filtered.length) {
     inboxList.innerHTML = '<div class="inbox-empty">Brak zapisanych zgłoszeń.</div>';
     return;
   }
-  const grouped = reports.reduce((groups, report) => {
+  const grouped = filtered.reduce((groups, report) => {
     const category = report.category || 'Inne zgłoszenia';
     (groups[category] ||= []).push(report);
     return groups;
   }, {});
   inboxList.innerHTML = Object.entries(grouped).map(([category, categoryReports]) => `<section class="inbox-category-group"><div class="inbox-category-heading"><span>${escapeHtml(category)}</span><strong>${categoryReports.length}</strong></div>${categoryReports.map((report) => {
     const completed = Boolean(report.completed);
-    return `<article class="inbox-item${completed ? ' is-completed' : ''}"><div class="inbox-item-top"><span class="inbox-category">${escapeHtml(report.category)}</span><strong>${escapeHtml(report.id)}</strong></div><div class="inbox-item-meta"><span>${escapeHtml(report.location)}</span><span>${escapeHtml(report.priority)}</span><time>${escapeHtml(report.created_at)}</time></div><p>${escapeHtml(report.description)}</p><small>Zgłaszający: ${escapeHtml(report.reporter)} · Kontakt: ${escapeHtml(report.contact)}</small><label class="completion-toggle"><input type="checkbox" data-report-id="${escapeHtml(report.id)}" ${completed ? 'checked' : ''}><span class="completion-track"><i></i></span><span class="completion-label">${completed ? 'Zrealizowane' : 'Do realizacji'}</span></label></article>`;
+    const reportStatus = report.status || (completed ? 'Zakończone' : 'Nowe');
+    return `<article class="inbox-item${completed ? ' is-completed' : ''}"><div class="inbox-item-top"><span class="inbox-category">${escapeHtml(report.category)}</span><strong>${escapeHtml(report.id)}</strong></div><div class="inbox-item-meta"><span>${escapeHtml(report.location)}</span><span class="priority-badge priority-${escapeHtml(report.priority)}">${escapeHtml(report.priority)}</span><time>${escapeHtml(report.created_at)}</time></div><p>${escapeHtml(report.description)}</p><small>Zgłaszający: ${escapeHtml(report.reporter)} · Kontakt: ${escapeHtml(report.contact)}</small><div class="inbox-controls"><select class="status-select" data-report-id="${escapeHtml(report.id)}"><option ${reportStatus === 'Nowe' ? 'selected' : ''}>Nowe</option><option ${reportStatus === 'W trakcie' ? 'selected' : ''}>W trakcie</option><option ${reportStatus === 'Zakończone' ? 'selected' : ''}>Zakończone</option></select><select class="assignee-select" data-report-id="${escapeHtml(report.id)}"><option ${!report.assigned_to || report.assigned_to === 'Nieprzypisane' ? 'selected' : ''}>Nieprzypisane</option><option ${report.assigned_to === 'Technik dyżurny' ? 'selected' : ''}>Technik dyżurny</option><option ${report.assigned_to === 'Sekcja sprzętowa' ? 'selected' : ''}>Sekcja sprzętowa</option></select><label class="completion-toggle"><input type="checkbox" data-report-id="${escapeHtml(report.id)}" ${completed ? 'checked' : ''}><span class="completion-track"><i></i></span><span class="completion-label">${completed ? 'Zrealizowane' : 'Do realizacji'}</span></label></div></article>`;
   }).join('')}</section>`).join('');
   inboxList.querySelectorAll('.completion-toggle input').forEach((toggle) => {
     toggle.addEventListener('change', () => updateReportStatus(toggle));
   });
+  inboxList.querySelectorAll('.status-select, .assignee-select').forEach((select) => select.addEventListener('change', () => updateReportControl(select)));
+}
+
+async function updateReportControl(control) {
+  const report = inboxReports.find((item) => item.id === control.dataset.reportId);
+  if (!report) return;
+  const payload = { password: inboxAccessPassword, report_id: report.id };
+  if (control.classList.contains('status-select')) payload.status = control.value;
+  else payload.assigned_to = control.value;
+  const response = await fetch('/api/technical-reports/status', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  if (!response.ok) return;
+  const data = await response.json();
+  Object.assign(report, data);
+  renderInbox(inboxReports);
 }
 
 async function updateReportStatus(toggle) {
@@ -314,6 +354,7 @@ inboxPasswordForm?.addEventListener('submit', (event) => {
   loadInbox();
 });
 inboxRefresh?.addEventListener('click', loadInbox);
+[inboxSearch, inboxStatusFilter, inboxPriorityFilter, inboxSort].forEach((control) => control?.addEventListener('input', () => renderInbox(inboxReports)));
 
 function openDetails(key) {
   const detail = serviceDetails[key];

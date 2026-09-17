@@ -42,6 +42,18 @@
   background-image: repeating-linear-gradient(0deg, rgba(142,105,59,.08) 0 1px, transparent 1px 5px); 
   pointer-events: none; 
 } 
+.inbox-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.inbox-stats span { padding: 10px; border: 1px solid rgba(7,91,137,.14); border-radius: 12px; color: var(--muted); background: rgba(231,241,247,.55); font-size: .7rem; text-align: center; }
+.inbox-stats strong { display: block; color: var(--institutional-blue-dark); font-size: 1.25rem; }
+.inbox-toolbar { display: grid; grid-template-columns: minmax(170px, 1.4fr) repeat(3, minmax(125px, 1fr)) auto auto; gap: 8px; align-items: center; }
+.inbox-toolbar input, .inbox-toolbar select { min-width: 0; margin: 0; padding: 10px 11px; border: 1px solid rgba(7,91,137,.18); border-radius: 10px; color: var(--institutional-blue-dark); background: #fbfdfd; font: inherit; font-size: .72rem; }
+.inbox-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.inbox-controls select { padding: 7px 9px; border: 1px solid rgba(7,91,137,.18); border-radius: 8px; color: var(--institutional-blue-dark); background: #fbfdfd; font: inherit; font-size: .68rem; }
+.priority-badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; background: rgba(7,91,137,.08); font-weight: 800; }
+.priority-Pilne\ przed\ zajęciami { color: #ad432d; background: rgba(232,132,86,.16); }
+.priority-Ważna\ uwaga { color: #8a6924; background: rgba(214,178,67,.17); }
+@media (max-width: 850px) { .inbox-toolbar { grid-template-columns: 1fr 1fr; } .inbox-toolbar input { grid-column: 1 / -1; } .inbox-stats { grid-template-columns: 1fr 1fr 1fr; } }
+@media (max-width: 520px) { .inbox-stats { grid-template-columns: 1fr; } .inbox-toolbar { grid-template-columns: 1fr; } }
 .mailbox-visual { 
   display: grid; 
   place-items: center; 
