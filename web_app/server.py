@@ -720,17 +720,12 @@ async def update_technical_report_status(update: TechnicalReportStatusUpdate):
     if not secrets.compare_digest(update.password, INBOX_PASSWORD):
         raise HTTPException(status_code=401, detail="Nieprawidłowe hasło.")
 
-    reports = []
-    if REPORTS_FILE.exists():
-        try:
-            reports = json.loads(REPORTS_FILE.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            reports = []
+    reports = load_technical_reports()
 
     for report in reports:
         if report.get("id") == update.report_id:
             report["completed"] = update.completed
-            REPORTS_FILE.write_text(json.dumps(reports, ensure_ascii=False, indent=2), encoding="utf-8")
+            save_reports(reports)
             return {"report_id": update.report_id, "completed": update.completed}
 
     raise HTTPException(status_code=404, detail="Nie znaleziono zgłoszenia.")
