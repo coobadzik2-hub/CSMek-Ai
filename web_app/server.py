@@ -704,16 +704,40 @@ async def create_technical_report(report: TechnicalReport):
 
     reports = load_technical_reports()
 
+    calculated_priority = report.priority
+    if report.impact == "Blokuje zajęcia" or (report.affected_people or 0) >= 10:
+        calculated_priority = "Pilne przed zajęciami"
+    elif report.impact == "Utrudnia zajęcia" and calculated_priority == "Standardowy":
+        calculated_priority = "Ważna uwaga"
+
     report_id = f"TECH-{datetime.now().strftime('%Y%m%d')}-{len(reports) + 1:03d}"
     entry = {
         "id": report_id,
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "completed": False,
-        **report.model_dump()
+        **report.model_dump(exclude={"priority"}),
+        "priority": calculated_priority,
+        "status": "Nowe",
+        "assigned_to": "Nieprzypisane"
     }
     reports.append(entry)
     save_reports(reports)
     return {"report_id": report_id}
+
+
+@app.get("/api/technical-reports/{report_id}")
+async def technical_report_status(report_id: str):
+    for report in load_technical_reports():
+        if report.get("id") == report_id:
+            return {
+                "report_id": report_id,
+                "status": report.get("status", "Zakończone" if report.get("completed") else "Nowe"),
+                "priority": report.get("priority", "Standardowy"),
+                "assigned_to": report.get("assigned_to", "Nieprzypisane"),
+                "created_at": report.get("created_at"),
+                "location": report.get("location")
+            }
+    raise HTTPException(status_code=404, detail="Nie znaleziono zgłoszenia.")
 
 
 @app.post("/api/technical-reports/{report_id}/attachment")
