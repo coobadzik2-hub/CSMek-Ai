@@ -45,3 +45,49 @@ let scenarioIndex = 0;
 function renderScenario() { const step = scenarioSteps[scenarioIndex]; const prompt = document.getElementById('scenarioPrompt'); const options = document.getElementById('scenarioOptions'); if (!prompt || !options) return; prompt.textContent = step.prompt; options.innerHTML = step.options.map(([label, correct]) => `<button type="button" data-correct="${correct}">${label}</button>`).join(''); options.querySelectorAll('button').forEach((button) => button.addEventListener('click', () => { document.getElementById('scenarioFeedback').textContent = button.dataset.correct === 'true' ? 'Dobra decyzja. Przechodzimy dalej zgodnie z ABCDE.' : 'Zatrzymaj się i wróć do uporządkowanej oceny ABCDE.'; })); }
 document.getElementById('scenarioNext')?.addEventListener('click', () => { scenarioIndex = (scenarioIndex + 1) % scenarioSteps.length; renderScenario(); document.getElementById('scenarioFeedback').textContent = ''; });
 renderScenario();
+
+const studyCards = [
+  ['Co oznacza litera C w ABCDE?', 'Krążenie: tętno, ciśnienie, perfuzja i kontrola krwotoku.'],
+  ['Jaki jest cel RKO?', 'Podtrzymanie krążenia i utlenowania do czasu przywrócenia krążenia lub przyjazdu zespołu.'],
+  ['Kiedy wynik NEWS2 wymaga pilnej eskalacji?', 'Wysoki wynik lub gwałtowne pogorszenie parametrów wymaga pilnej oceny zgodnie z lokalnym protokołem.'],
+  ['Co obejmuje triage?', 'Szybką ocenę i przypisanie priorytetu według zagrożenia życia oraz dostępnych zasobów.']
+];
+let flashcardIndex = 0;
+let studyCount = Number(localStorage.getItem('csmek-study-count') || 0);
+let scenarioCount = Number(localStorage.getItem('csmek-scenario-count') || 0);
+const flashcardQuestion = document.getElementById('flashcardQuestion');
+const flashcardAnswer = document.getElementById('flashcardAnswer');
+const flashcardReveal = document.getElementById('flashcardReveal');
+const studyProgress = document.getElementById('studyProgress');
+const learningStats = document.getElementById('learningStats');
+function renderFlashcard() { const card = studyCards[flashcardIndex]; if (flashcardQuestion) flashcardQuestion.textContent = card[0]; if (flashcardAnswer) { flashcardAnswer.textContent = card[1]; flashcardAnswer.hidden = true; } if (flashcardReveal) flashcardReveal.textContent = 'Pokaż odpowiedź'; if (studyProgress) studyProgress.textContent = `Powtórzone: ${studyCount}`; if (learningStats) learningStats.textContent = `Nauka: ${studyCount} fiszek · ${scenarioCount} scenariuszy`; }
+flashcardReveal?.addEventListener('click', () => { flashcardAnswer.hidden = !flashcardAnswer.hidden; flashcardReveal.textContent = flashcardAnswer.hidden ? 'Pokaż odpowiedź' : 'Ukryj odpowiedź'; });
+function nextFlashcard() { studyCount += 1; localStorage.setItem('csmek-study-count', String(studyCount)); flashcardIndex = (flashcardIndex + 1) % studyCards.length; renderFlashcard(); }
+document.getElementById('flashcardEasy')?.addEventListener('click', nextFlashcard);
+document.getElementById('flashcardHard')?.addEventListener('click', nextFlashcard);
+renderFlashcard();
+
+document.getElementById('patientGenerate')?.addEventListener('click', () => {
+  const age = document.getElementById('patientAge').value || 'nieokreślony';
+  const sex = document.getElementById('patientSex').value;
+  const complaint = document.getElementById('patientComplaint').value || 'brak skargi głównej';
+  const priority = document.getElementById('patientPriority').value;
+  const notes = document.getElementById('patientNotes').value || 'brak dodatkowych obserwacji';
+  document.getElementById('patientSummary').textContent = `Pacjent: ${age} lat, ${sex}. Skarga: ${complaint}. Priorytet: ${priority}. Notatki: ${notes}.`;
+  scenarioCount += 1; localStorage.setItem('csmek-scenario-count', String(scenarioCount));
+  if (learningStats) learningStats.textContent = `Nauka: ${studyCount} fiszek · ${scenarioCount} scenariuszy`;
+});
+document.getElementById('patientPrint')?.addEventListener('click', () => window.print());
+
+const events = [
+  ['Warsztat ABCDE', 'Ćwiczenia z uporządkowanej oceny pacjenta', 'Najbliższy termin do ustalenia'],
+  ['Otwarte sale symulacyjne', 'Praca własna studentów z trenażerami', 'Sprawdź dostępność w CSM'],
+  ['Debriefing zespołowy', 'Omówienie decyzji i komunikacji w zespole', 'Wydarzenie edukacyjne']
+];
+const eventsList = document.getElementById('eventsList');
+if (eventsList) eventsList.innerHTML = events.map(([title, description, date]) => `<article class="event-item"><strong>${title}</strong><p>${description}</p><small>${date}</small></article>`).join('');
+
+document.getElementById('contrastToggle')?.addEventListener('click', () => { document.body.classList.toggle('high-contrast'); localStorage.setItem('csmek-contrast', document.body.classList.contains('high-contrast') ? 'on' : 'off'); });
+document.getElementById('fontSizeToggle')?.addEventListener('click', () => { document.body.classList.toggle('large-text'); localStorage.setItem('csmek-font-size', document.body.classList.contains('large-text') ? 'large' : 'normal'); });
+if (localStorage.getItem('csmek-contrast') === 'on') document.body.classList.add('high-contrast');
+if (localStorage.getItem('csmek-font-size') === 'large') document.body.classList.add('large-text');
