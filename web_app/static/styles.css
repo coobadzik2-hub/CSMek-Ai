@@ -156,14 +156,24 @@ button, input, textarea { min-height: 44px; }
 .clinical-tools { order: 4; position: relative; margin-top: 18px; overflow: hidden; }
 .clinical-tools::before { content: "CSM / CLINICAL TOOLKIT"; position: absolute; top: 18px; right: 22px; color: var(--muted); font-size: .62rem; font-weight: 800; letter-spacing: .16em; opacity: .7; }
 .tool-disclaimer { padding: 6px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: .68rem; font-weight: 700; letter-spacing: .04em; }
-.student-dashboard { margin: 4px 0 18px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(110deg, var(--panel-soft), var(--primary-soft)); animation: toolCardIn .5s ease both; }
-.student-dashboard .tool-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-.progress-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.progress-metrics article { display: grid; gap: 2px; padding: 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-strong); }
-.progress-metrics strong { color: var(--primary-dark); font-size: 1.3rem; }
+.student-dashboard { position: relative; isolation: isolate; margin: 4px 0 20px; padding: 18px 20px 16px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent-strong) 55%, var(--line)); border-radius: 15px; background: linear-gradient(115deg, color-mix(in srgb, var(--primary) 15%, var(--panel-strong)), var(--panel-soft) 58%, color-mix(in srgb, var(--accent) 16%, var(--panel-strong))); box-shadow: 0 16px 34px rgba(14, 109, 141, .14), inset 0 1px 0 rgba(255,255,255,.4); animation: studentPanelIn .65s cubic-bezier(.2,.75,.25,1) both; }
+.student-dashboard::before { content: ""; position: absolute; z-index: -1; top: -54px; right: 8%; width: 180px; height: 180px; border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius: 50%; box-shadow: 0 0 0 16px color-mix(in srgb, var(--accent) 7%, transparent), 0 0 0 32px color-mix(in srgb, var(--accent) 4%, transparent); opacity: .8; animation: studentPulse 5s ease-in-out infinite; }
+.student-dashboard::after { content: "STUDENT / PROGRESS"; position: absolute; right: 20px; bottom: 13px; color: var(--accent-strong); font-size: .58rem; font-weight: 900; letter-spacing: .15em; opacity: .75; }
+.student-dashboard .tool-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.student-dashboard .tool-section-heading h3 { color: var(--primary-dark); font-size: 1.2rem; }
+.student-dashboard .eyebrow { color: var(--accent-strong); }
+.progress-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 720px; }
+.progress-metrics article { position: relative; display: grid; gap: 3px; padding: 12px 13px; border: 1px solid color-mix(in srgb, var(--accent-strong) 30%, var(--line)); border-radius: 10px; background: color-mix(in srgb, var(--panel-strong) 78%, transparent); transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+.progress-metrics article:hover { transform: translateY(-3px); border-color: var(--accent-strong); box-shadow: 0 8px 18px color-mix(in srgb, var(--accent-strong) 16%, transparent); }
+.progress-metrics strong { color: var(--primary-dark); font-size: 1.5rem; line-height: 1; }
 .progress-metrics span, .student-dashboard > small { color: var(--muted); font-size: .72rem; }
 .progress-track { height: 7px; margin-top: 12px; overflow: hidden; border-radius: 99px; background: var(--line); }
-.progress-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--accent-strong)); transition: width .5s ease; }
+.progress-track { max-width: 720px; }
+.progress-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--accent-strong)); box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 70%, transparent); transition: width .7s cubic-bezier(.2,.75,.25,1); }
+.student-dashboard > small { display: block; margin-top: 8px; }
+@keyframes studentPanelIn { from { opacity: 0; transform: translateY(-8px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes studentPulse { 0%, 100% { transform: scale(.96); opacity: .55; } 50% { transform: scale(1.04); opacity: .9; } }
+@media (prefers-reduced-motion: reduce) { .student-dashboard, .student-dashboard::before { animation: none; } }
 .tool-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .tool-card, .patient-card, .flashcard-card, .events-card { animation: toolCardIn .55s cubic-bezier(.2,.75,.25,1) both; }
 .tool-card { position: relative; display: grid; gap: 9px; align-content: start; padding: 17px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(145deg, var(--panel-strong), var(--panel-soft)); box-shadow: 0 12px 24px rgba(14, 109, 141, .08); transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease; }
